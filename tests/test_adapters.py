@@ -66,3 +66,31 @@ def test_openinference_span_status_and_plain_text_errors():
              span("write_file", {"path": "c.py", "content": "z"}, "written", status="ERROR")]
     ops = openinference.load({"spans": spans})
     assert [o.ok for o in ops] == [True, False, False]
+
+
+def test_openinference_arguments_from_input_value_when_parameters_is_a_schema():
+    """Arize's CrewAI instrumentor stores the argument schema in tool.parameters and the call in input.value."""
+    from fathom_read.adapters import openinference
+    schema = json.dumps({"description": "Input for SerperDevTool.", "properties": {"search_query": {"type": "string"}},
+                         "required": ["search_query"], "title": "SerperDevToolSchema", "type": "object"})
+    spans = [{"attributes": {"openinference.span.kind": "TOOL", "tool.name": "Search the internet with Serper",
+                             "tool.parameters": schema, "input.value": json.dumps({"search_query": q})},
+              "start_time": i} for i, q in enumerate(["ai in finance", "ai in finance"])]
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+        json.dump({"search_the_internet_with_serper": {"op": "add", "kind": "research", "key": "queries", "value": "search_query"}}, f)
+        path = f.name
+    try:
+        ops = openinference.load({"spans": spans}, mapping_path=path)
+    finally:
+        os.unlink(path)
+    assert [(o.op, o.key, o.value) for o in ops] == [("add", "queries", "ai in finance"), ("add", "queries", "ai in finance")]
+
+
+def test_openinference_arguments_from_parameters_when_they_carry_the_call():
+    from fathom_read.adapters import openinference
+    spans = [{"attributes": {"openinference.span.kind": "TOOL", "tool.name": "write_record",
+                             "tool.parameters": json.dumps({"record": "r0", "content": "customer_id: 1"}),
+                             "input.value": json.dumps({"ignored": True})}, "start_time": 0}]
+    ops = openinference.load({"spans": spans})
+    assert [(o.op, o.kind, o.key, o.value) for o in ops] == [("set", "record", "r0", "customer_id: 1")]

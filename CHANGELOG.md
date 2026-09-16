@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1 (2026-09-16)
+
+The openinference adapter takes a TOOL span's arguments from `input.value` when `tool.parameters` is missing or
+carries the tool's argument schema instead of the call. Arize's CrewAI instrumentor writes spans that way (the schema
+in `tool.parameters`, the arguments in `input.value`), and the adapter had read the schema as the arguments, so a
+repeated search on such a span read as an add with no value. Spans whose `tool.parameters` carries the arguments read
+as before.
+
 ## 0.4.0 (2026-09-15)
 
 Seven adapters for frameworks that write their own log files, and one more thing the read reports.

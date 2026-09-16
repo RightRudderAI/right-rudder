@@ -2,8 +2,11 @@
 OpenInference traces, the span format Arize Phoenix stores.
 
 Input: a list of spans, each with an "attributes" dict carrying openinference.span.kind,
-tool.name, tool.parameters, and output.value; or {"spans": [...]}. Only TOOL spans matter.
-Edit tools fold through the edits adapter when the document carries "initial_files".
+tool.name, tool.parameters (or input.value), and output.value; or {"spans": [...]}. Only TOOL spans
+matter. Some instrumentors (Arize's CrewAI instrumentor among them) put the tool's argument schema in
+tool.parameters and the call's actual arguments in input.value; when tool.parameters is missing or
+reads as a schema, the arguments come from input.value. Edit tools fold through the edits adapter when
+the document carries "initial_files".
 """
 from __future__ import annotations
 
@@ -17,6 +20,7 @@ from ._tools import op_from_tool, load_map
 KIND = "openinference.span.kind"
 TOOL_NAME = "tool.name"
 TOOL_PARAMS = "tool.parameters"
+INPUT = "input.value"
 OUTPUT = "output.value"
 
 
@@ -29,6 +33,21 @@ def _parse(v, default=None):
         return json.loads(v)
     except (TypeError, ValueError):
         return default
+
+
+def _looks_like_schema(params: Any) -> bool:
+    return isinstance(params, dict) and ("properties" in params or params.get("type") == "object" and "properties" in params)
+
+
+def _arguments(a: Dict[str, Any]) -> Dict[str, Any]:
+    """The call's arguments: tool.parameters when it carries them, else input.value."""
+    params = _parse(a.get(TOOL_PARAMS), None)
+    if isinstance(params, dict) and params and not _looks_like_schema(params):
+        return params
+    inp = _parse(a.get(INPUT), None)
+    if isinstance(inp, dict):
+        return inp
+    return params if isinstance(params, dict) else {}
 
 
 def load(doc: Any, mapping_path: str = None, **_) -> List[Op]:
@@ -53,7 +72,7 @@ def load(doc: Any, mapping_path: str = None, **_) -> List[Op]:
     ops: List[Op] = []
     for i, a in enumerate(tool_spans):
         name = a.get(TOOL_NAME, "")
-        params = _parse(a.get(TOOL_PARAMS), {}) or {}
+        params = _arguments(a)
         raw_out = a.get(OUTPUT)
         ret = _parse(raw_out, raw_out)
         ok = not a.get("_span_error", False)
