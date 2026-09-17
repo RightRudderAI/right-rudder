@@ -62,7 +62,29 @@ That trace ships with the package, so the output above reproduces. A run the rea
   exposure alarm: none
 ```
 
-The package ships with a demo key that is rate-limited per day. For your own key, which lifts the limit and keeps your traces on a private tier, write to [contact@embeddedriskanalytics.com](mailto:contact@embeddedriskanalytics.com?subject=fathom-read%20key) and set `FATHOM_API_KEY`. `--ops` shows exactly what would be sent: the ops the adapter produced, and nothing else.
+The package ships with a demo key that is rate-limited per day, and `fathom key you@example.com` issues a free key with a higher limit on the spot. Set `FATHOM_API_KEY`. `--ops` shows exactly what would be sent: the ops the adapter produced, and nothing else.
+
+## The repair
+
+```
+fathom key you@example.com                                # a free key, printed once; export FATHOM_API_KEY=...
+fathom reground trace.json --proposals '[{"op":"add","kind":"research","key":"queries","value":"..."}]'
+```
+
+The read names the step where an agent contradicted its own committed state. The repair runs in front of that step. Send the run so far and the actions the agent proposes to take next, in the agent's own order, and the service returns one of three decisions. Proceed means every proposal is consistent with what the agent has already committed. Filter means some are, and the first of them is the agent's own consistent alternative, so take it. Reground means none are, and the response carries the facts the proposals contradicted, the collection and what it already holds, the fact and the value it carries now, the key and the name it was renamed to, so you can put them back in front of the agent and ask again. `RegroundVerdict.prompt_note()` renders those facts as a note for the prompt.
+
+On DBOS's own published Hacker News research agent (gpt-4o-mini, five topics, ten iterations), the repair in front of the one step where the agent proposes its next queries took repeated searches from 14 of 50 to 0 of 50, redundant thread reads from 42 percent to 12 percent, and distinct threads covered up 35 percent, at the same model and iteration count. The runs, the mapping, and every decision the repair made sit in the [coherence census](https://github.com/ERA-Fathom/coherence-census/tree/main/rows/dbos-hn-agent).
+
+The read and the repair are free to run. The two reads accept the demo key at a daily limit with no sign-up. The repair needs a key, and `fathom key` issues one on the spot for an email address, with a limit of 2,000 calls a day, a repair call counting as two. The service records call metadata (route, format, counts, decision, timing) and never the content of your ops unless you opt in. `fathom reground` exits 3 on reground and 0 otherwise.
+
+```
+$ fathom reground ops.json --proposals '[{"op":"add","kind":"research","key":"queries","value":"postgres performance"}]'
+
+== ops.json: reground (1 proposal(s), 0 kept, 1 dropped)
+  drop  add research 'queries' = 'postgres performance'  (duplicate_commit)
+COMMITTED STATE CHECK. The following is already established in this run and must be honored:
+- research 'queries' already holds: 'postgres performance', 'postgres indexing strategies'. Do not propose any of these again.
+```
 
 ## What it reads
 

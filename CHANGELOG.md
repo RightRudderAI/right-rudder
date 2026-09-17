@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0 (2026-09-17)
+
+The repair, hosted, and free keys.
+
+The repair. `fathom reground` and `fathom_read.reground()` send the run so far and the actions the agent proposes next,
+and return proceed, filter, or reground, with the committed facts the proposals contradicted on a reground so the caller
+can put them back in front of the agent and ask again. This is the step that ran in front of DBOS's Hacker News research
+agent on 2 September, now served for any trace the adapters read. `RegroundVerdict.prompt_note()` renders the facts as a
+prompt note.
+
+Keys. `fathom key you@example.com` issues a free key on the spot, 2,000 calls a day with a repair call counting as two.
+The two reads still accept the demo key with no sign-up. The service records call metadata and never op content.
+
 ## 0.4.1 (2026-09-16)
 
 The openinference adapter takes a TOOL span's arguments from `input.value` when `tool.parameters` is missing or

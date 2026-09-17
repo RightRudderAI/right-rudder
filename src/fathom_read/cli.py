@@ -7,7 +7,7 @@ import sys
 from typing import List, Optional, Tuple
 
 from . import adapters
-from .client import DEMO_KEY, ReadError, expiry, read
+from .client import DEMO_KEY, ReadError, expiry, read, reground, request_key
 from .ops import Op, Verdict
 
 EXAMPLES = os.path.join(os.path.dirname(__file__), "examples")
@@ -137,6 +137,42 @@ def cmd_expiry(args) -> int:
     return 3 if ex["alarm"].get("exposure_first_step") is not None else 0
 
 
+def cmd_reground(args) -> int:
+    ops = load_ops(args.path, args.format, args.map)
+    try:
+        proposals = json.load(open(args.proposals)) if os.path.exists(args.proposals) else json.loads(args.proposals)
+    except ValueError:
+        raise SystemExit("fathom: --proposals takes a JSON list of op-shaped dicts, or a path to one")
+    if not isinstance(proposals, list):
+        raise SystemExit("fathom: proposals must be a list")
+    try:
+        v = reground(ops, proposals, supersede=parse_supersede(args.supersede), key=args.key, endpoint=args.endpoint)
+    except ReadError as e:
+        raise SystemExit(f"fathom: {e}")
+    if args.json:
+        print(json.dumps(v.as_dict(), indent=2))
+    else:
+        print(f"== {os.path.basename(args.path)}: {v.decision} ({v.proposals} proposal(s), {len(v.keep)} kept, {len(v.dropped)} dropped)")
+        for d in v.dropped:
+            print(f"  drop  {d['op']} {d['kind']} '{d['key']}'" + (f" = {d['value']!r}" if d.get('value') is not None else "") + f"  ({', '.join(d['findings'])})")
+        for k in v.kept:
+            print(f"  keep  {k['op']} {k['kind']} '{k['key']}'" + (f" = {k['value']!r}" if k.get('value') is not None else ""))
+        if v.decision == "reground":
+            print(v.prompt_note().strip())
+    return 3 if v.decision == "reground" else 0
+
+
+def cmd_key(args) -> int:
+    try:
+        rep = request_key(args.email, endpoint=args.endpoint)
+    except ReadError as e:
+        raise SystemExit(f"fathom: {e}")
+    print(rep["key"])
+    print(f"# a free key, {rep.get('daily_limit')} calls a day. Keep it; it is stored hashed and cannot be shown again.", file=sys.stderr)
+    print("# export FATHOM_API_KEY=" + rep["key"], file=sys.stderr)
+    return 0
+
+
 def cmd_demo(args) -> int:
     print("fathom demo: a coding agent renames guest_id to customer_id across five files, then runs the tests.\n")
     for name in ("rename_coherent.json", "rename_starved.json"):
@@ -187,6 +223,21 @@ def main(argv: Optional[List[str]] = None) -> int:
     x.add_argument("--ops", action="store_true", help="print the op stream the adapter produced and stop (nothing is sent)")
     _common(x)
     x.set_defaults(fn=cmd_expiry)
+
+    g = sub.add_parser("reground", help="check the actions an agent proposes next against its committed state, and get the facts to put back in front of it")
+    g.add_argument("path", help="trace file so far (.json, .jsonl, or a framework's own log file)")
+    g.add_argument("--proposals", required=True, metavar="JSON", help="the proposed next actions as a JSON list of ops, or a path to one")
+    g.add_argument("--format", default="auto", help="one of the names `fathom formats` lists (default: auto)")
+    g.add_argument("--supersede", action="append", metavar="OLD=NEW", help="a token the run should have replaced (repeatable)")
+    g.add_argument("--map", help="JSON file mapping your tool or step names to ops")
+    g.add_argument("--json", action="store_true", help="print the decision as JSON")
+    _common(g)
+    g.set_defaults(fn=cmd_reground)
+
+    k = sub.add_parser("key", help="get a free service key (prints it once)")
+    k.add_argument("email", help="where a note goes if the service changes; nothing else is sent")
+    k.add_argument("--endpoint", help=argparse.SUPPRESS)
+    k.set_defaults(fn=cmd_key)
 
     d = sub.add_parser("demo", help="run the bundled rename example, coherent and not")
     _common(d)
