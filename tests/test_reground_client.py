@@ -48,4 +48,4 @@ def test_cli_reground_exit_codes(monkeypatch, tmp_path, capsys):
 
 def test_reground_exported():
     assert callable(fathom_read.reground) and callable(fathom_read.request_key)
-    assert fathom_read.__version__ == "0.5.0"
+    assert fathom_read.__version__ == "0.6.0"

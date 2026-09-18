@@ -34,8 +34,8 @@ def test_load_ops_reads_a_framework_log_file(tmp_path):
     assert [o.kind for o in load_ops(str(q))] == ["symbol", "region", "symbol", "region", "answer"]
 
 
-def test_formats_lists_fourteen_adapters():
-    assert len(adapters.FORMATS) == 14
+def test_formats_lists_fifteen_adapters():
+    assert len(adapters.FORMATS) == 15
     for name in adapters.TEXT_FORMATS:
         assert hasattr(adapters.FORMATS[name], "looks_like")
 
