@@ -2,7 +2,7 @@
 from .ops import Op, Finding, Verdict, RegroundVerdict  # noqa: F401
 from .client import read, expiry, reground, request_key, ReadError  # noqa: F401
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __all__ = ["Op", "Finding", "Verdict", "RegroundVerdict", "read", "expiry", "reground", "request_key", "ReadError", "read_file", "expiry_file", "load_ops"]
 
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (2026-09-18)
+
+A deepagents adapter, so a deep-research run reads through the same committed-state path as the rest.
+
+Adapter. `deepagents` maps a deepagents deep-research run to the op stream, the orchestrator's calls and each sub-agent's, a delegation to a research collection, a search to a query add with a source per result, a file write to a file set, and the report's cited urls to source refs, so a rewritten citation reads as a stale reference and a repeated search or delegation as a duplicate commit. `fathom read` recognises a deepagents trace from its own `calls` markers, and the package now reads fifteen formats. The trace comes from one `FathomCapture` at the graph root in langchain-fathom, which sees the sub-agents an orchestrator-level middleware does not.
+
 ## 0.5.0 (2026-09-17)
 
 The repair, hosted, and free keys.

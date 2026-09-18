@@ -1,6 +1,7 @@
 """Adapters turn what a framework already records into the op stream the read consumes."""
 from . import events, edits, openinference, langgraph, crewai, letta, dbos  # noqa: F401
 from . import openmanus, chatdev, metagpt, magentic, hyperagent, appworld, ag2  # noqa: F401
+from . import deepagents  # noqa: F401
 
 FORMATS = {
     "events": events,
@@ -17,6 +18,7 @@ FORMATS = {
     "hyperagent": hyperagent,
     "appworld": appworld,
     "ag2": ag2,
+    "deepagents": deepagents,
 }
 
 # Formats whose native record is a text log rather than a JSON document, tried in this order on text input.
@@ -38,6 +40,8 @@ def detect(doc) -> str:
             tr = doc.get("trajectory")
             if isinstance(tr, list) and tr and isinstance(tr[0], str) and tr[0].startswith("HyperAgent_"):
                 return "hyperagent"
+        if "calls" in doc and deepagents.looks_like(doc):
+            return "deepagents"
         if "log" in doc and isinstance(doc["log"], str):
             return detect(doc["log"])
         if "ops" in doc:
@@ -59,6 +63,8 @@ def detect(doc) -> str:
         if isinstance(first, dict):
             if "op" in first and "key" in first:
                 return "events"
+            if deepagents.looks_like(doc):
+                return "deepagents"
             if "attributes" in first or "span_kind" in first:
                 return "openinference"
             if "values" in first and ("next" in first or "config" in first or "metadata" in first or "step" in first):

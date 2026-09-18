@@ -96,6 +96,7 @@ COMMITTED STATE CHECK. The following is already established in this run and must
 | `letta` | Blocks, passages, and the memory-edit tool calls | `agents.blocks.list`, `agents.passages.list`, the tool calls from `agents.messages.list` |
 | `dbos` | A workflow's step stream | `{"workflow_id": ..., "steps": [{"step_name", "args", "result", "ok"}]}` |
 | `edits` | A coding agent's edit log | `{"initial_files": {...}, "edits": [{"tool": "str_replace_editor", "args": {...}, "ok": true}]}` |
+| `deepagents` | A deepagents run's tool calls, with sub-agent ancestry | One `FathomCapture` at the graph root (langchain-fathom), which follows the orchestrator into its sub-agents |
 | `events` | The native op stream | One op per line: `{"op": "set", "kind": "file", "key": "a.py", "value": "...", "ok": true}` |
 
 Seven frameworks are read from the log files they already write, with no export step. Point `fathom read` at the file and the format is recognised from the log's own markers.
