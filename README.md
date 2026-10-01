@@ -173,3 +173,8 @@ If you run long-horizon agents and want a readout on your own traces, send a bat
 ## License
 
 MIT. Fathom is a trademark of Embedded Risk Analytics.
+
+
+---
+
+If the read caught something in your own run, a star on this repository helps other teams find it.
