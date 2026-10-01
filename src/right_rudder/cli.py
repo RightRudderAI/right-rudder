@@ -25,7 +25,7 @@ def load_ops(path: str, fmt: str = "auto", mapping_path: Optional[str] = None) -
     if fmt == "auto":
         fmt = adapters.detect(doc)
     if fmt not in adapters.FORMATS:
-        raise SystemExit(f"unknown format {fmt!r}; run `fathom formats`")
+        raise SystemExit(f"unknown format {fmt!r}; run `right-rudder formats`")
     return adapters.FORMATS[fmt].load(doc, mapping_path=mapping_path)
 
 
@@ -59,7 +59,7 @@ def _read(ops, supersede, args) -> Verdict:
     try:
         return read(ops, supersede=supersede, key=args.key, endpoint=args.endpoint)
     except ReadError as e:
-        raise SystemExit(f"fathom: {e}")
+        raise SystemExit(f"right-rudder: {e}")
 
 
 def cmd_read(args) -> int:
@@ -124,7 +124,7 @@ def cmd_expiry(args) -> int:
         rep = expiry(ops, supersede=parse_supersede(args.supersede), calibration=args.calibration, horizon=args.horizon,
                      alarm_multiple=args.alarm_multiple, key=args.key, endpoint=args.endpoint)
     except ReadError as e:
-        raise SystemExit(f"fathom: {e}")
+        raise SystemExit(f"right-rudder: {e}")
     if args.json:
         print(json.dumps(rep, indent=2))
     else:
@@ -142,13 +142,13 @@ def cmd_reground(args) -> int:
     try:
         proposals = json.load(open(args.proposals)) if os.path.exists(args.proposals) else json.loads(args.proposals)
     except ValueError:
-        raise SystemExit("fathom: --proposals takes a JSON list of op-shaped dicts, or a path to one")
+        raise SystemExit("right-rudder: --proposals takes a JSON list of op-shaped dicts, or a path to one")
     if not isinstance(proposals, list):
-        raise SystemExit("fathom: proposals must be a list")
+        raise SystemExit("right-rudder: proposals must be a list")
     try:
         v = reground(ops, proposals, supersede=parse_supersede(args.supersede), key=args.key, endpoint=args.endpoint)
     except ReadError as e:
-        raise SystemExit(f"fathom: {e}")
+        raise SystemExit(f"right-rudder: {e}")
     if args.json:
         print(json.dumps(v.as_dict(), indent=2))
     else:
@@ -166,22 +166,22 @@ def cmd_key(args) -> int:
     try:
         rep = request_key(args.email, endpoint=args.endpoint)
     except ReadError as e:
-        raise SystemExit(f"fathom: {e}")
+        raise SystemExit(f"right-rudder: {e}")
     print(rep["key"])
     print(f"# a free key, {rep.get('daily_limit')} calls a day. Keep it; it is stored hashed and cannot be shown again.", file=sys.stderr)
-    print("# export FATHOM_API_KEY=" + rep["key"], file=sys.stderr)
+    print("# export RIGHT_RUDDER_API_KEY=" + rep["key"], file=sys.stderr)
     return 0
 
 
 def cmd_demo(args) -> int:
-    print("fathom demo: a coding agent renames guest_id to customer_id across five files, then runs the tests.\n")
+    print("right-rudder demo: a coding agent renames guest_id to customer_id across five files, then runs the tests.\n")
     for name in ("rename_coherent.json", "rename_starved.json"):
         ops = load_ops(os.path.join(EXAMPLES, name), "edits")
         v = _read(ops, [("guest_id", "customer_id")], args)
         print(render(v, f"== {name}"))
         print()
     print("Both runs reported success and a green test suite. Only one of them renamed the field.")
-    print("Try it on your own trace:  fathom read path/to/trace.json --supersede old=new")
+    print("Try it on your own trace:  right-rudder read path/to/trace.json --supersede old=new")
     return 0
 
 
@@ -193,17 +193,17 @@ def cmd_formats(args) -> int:
 
 
 def _common(p):
-    p.add_argument("--key", help="your read key (or set FATHOM_API_KEY); the demo key is rate-limited")
+    p.add_argument("--key", help="your read key (or set RIGHT_RUDDER_API_KEY); the demo key is rate-limited")
     p.add_argument("--endpoint", help=argparse.SUPPRESS)
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    p = argparse.ArgumentParser(prog="fathom", description="Catch the step where an AI agent contradicts a decision it already made.")
+    p = argparse.ArgumentParser(prog="right-rudder", description="Catch the step where an AI agent contradicts a decision it already made.")
     sub = p.add_subparsers(dest="cmd")
 
     r = sub.add_parser("read", help="read a trace and report contradictions of committed state")
     r.add_argument("path", help="trace file (.json, .jsonl, or a framework's own log file)")
-    r.add_argument("--format", default="auto", help="one of the names `fathom formats` lists (default: auto)")
+    r.add_argument("--format", default="auto", help="one of the names `right-rudder formats` lists (default: auto)")
     r.add_argument("--supersede", action="append", metavar="OLD=NEW", help="a token the run should have replaced, e.g. guest_id=customer_id (repeatable)")
     r.add_argument("--map", help="JSON file mapping your tool or step names to ops")
     r.add_argument("--json", action="store_true", help="print the verdict as JSON")
@@ -213,7 +213,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     x = sub.add_parser("expiry", help="read a trace and report the agent's functional life remaining and its alarm")
     x.add_argument("path", help="trace file (.json or .jsonl)")
-    x.add_argument("--format", default="auto", help="one of the names `fathom formats` lists (default: auto)")
+    x.add_argument("--format", default="auto", help="one of the names `right-rudder formats` lists (default: auto)")
     x.add_argument("--supersede", action="append", metavar="OLD=NEW", help="a token the run should have replaced (repeatable)")
     x.add_argument("--map", help="JSON file mapping your tool or step names to ops")
     x.add_argument("--calibration", help="the workload calibration to score under (default: the pooled shape)")
@@ -227,7 +227,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     g = sub.add_parser("reground", help="check the actions an agent proposes next against its committed state, and get the facts to put back in front of it")
     g.add_argument("path", help="trace file so far (.json, .jsonl, or a framework's own log file)")
     g.add_argument("--proposals", required=True, metavar="JSON", help="the proposed next actions as a JSON list of ops, or a path to one")
-    g.add_argument("--format", default="auto", help="one of the names `fathom formats` lists (default: auto)")
+    g.add_argument("--format", default="auto", help="one of the names `right-rudder formats` lists (default: auto)")
     g.add_argument("--supersede", action="append", metavar="OLD=NEW", help="a token the run should have replaced (repeatable)")
     g.add_argument("--map", help="JSON file mapping your tool or step names to ops")
     g.add_argument("--json", action="store_true", help="print the decision as JSON")

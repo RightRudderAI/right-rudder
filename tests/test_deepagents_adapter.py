@@ -1,7 +1,7 @@
 import json
 
-from fathom_read import load_ops
-from fathom_read.adapters import detect
+from right_rudder import load_ops
+from right_rudder.adapters import detect
 
 
 def _trace():

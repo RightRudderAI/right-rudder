@@ -9,7 +9,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from _mast_fixtures import *  # noqa: F401,F403
 from _mast_fixtures import _cd_update, _m1_sheet, _m1_log, _ha, _ha_edit, _aw_block, _ag2  # noqa: F401
-from fathom_read import adapters, load_ops
+from right_rudder import adapters, load_ops
 
 
 # --- detection and the CLI's text path -------------------------------------------------------

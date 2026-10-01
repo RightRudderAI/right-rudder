@@ -1,14 +1,14 @@
 cff-version: 1.2.0
-message: "If you use fathom-read in research, cite the paper below and this repository."
-title: "fathom-read: a committed-state read for long-horizon AI agents"
+message: "If you use right-rudder in research, cite the paper below and this repository."
+title: "right-rudder: a committed-state read for long-horizon AI agents"
 authors:
   - family-names: Galligan
     given-names: Peter
-repository-code: "https://github.com/ERA-Fathom/fathom"
+repository-code: "https://github.com/RightRudderAI/right-rudder"
 url: "https://embeddedriskanalytics.com"
 license: MIT
-version: 0.4.0
-date-released: "2026-09-15"
+version: 0.7.0
+date-released: "2026-10-01"
 preferred-citation:
   type: article
   title: "Records, Reflexive Modeling, and the Conditions for Stable Physical Histories: A Feasibility Inequality and Three Minimal Models"

@@ -1,6 +1,6 @@
 import io, json
 import urllib.request
-from fathom_read import Op, read, Verdict
+from right_rudder import Op, read, Verdict
 
 
 class _Resp(io.BytesIO):

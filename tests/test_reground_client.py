@@ -1,8 +1,8 @@
 """The repair client: the verdict type, the prompt note, and the CLI wiring, with the service stubbed."""
 import json
-import fathom_read
-from fathom_read import RegroundVerdict, Op
-from fathom_read import cli
+import right_rudder
+from right_rudder import RegroundVerdict, Op
+from right_rudder import cli
 
 
 def _verdict(decision="reground"):
@@ -47,5 +47,5 @@ def test_cli_reground_exit_codes(monkeypatch, tmp_path, capsys):
 
 
 def test_reground_exported():
-    assert callable(fathom_read.reground) and callable(fathom_read.request_key)
-    assert fathom_read.__version__ == "0.6.0"
+    assert callable(right_rudder.reground) and callable(right_rudder.request_key)
+    assert right_rudder.__version__ == "0.7.0"

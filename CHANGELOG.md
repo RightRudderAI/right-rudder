@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 (unreleased)
+
+Fathom is now Right Rudder, by Embedded Risk Analytics. The package installs as `right-rudder`, imports as `right_rudder`, and runs as the `right-rudder` command. The reads stay as they were. The same hosted service at read.embeddedriskanalytics.com forms every verdict, and existing free keys keep working.
+
+Compatibility. The `fathom` command still works in this release. The `RIGHT_RUDDER_` environment variables take precedence, and the `FATHOM_` names still read as fallbacks. `FathomListener` remains as an alias of `RightRudderListener`. The final `fathom-read` release (0.7.0) depends on this package and re-exports it under `fathom_read` with a deprecation warning, so existing imports keep working.
+
 ## 0.6.0 (2026-09-18)
 
 A deepagents adapter, so a deep-research run reads through the same committed-state path as the rest.

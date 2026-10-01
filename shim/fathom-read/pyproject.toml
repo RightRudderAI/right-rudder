@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fathom-read"
+version = "0.7.0"
+description = "Fathom is now Right Rudder. This final release installs right-rudder and keeps the fathom_read import working."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Embedded Risk Analytics", email = "contact@embeddedriskanalytics.com"}]
+dependencies = ["right-rudder>=0.7.0"]
+
+[project.urls]
+Homepage = "https://embeddedriskanalytics.com"
+Repository = "https://github.com/RightRudderAI/right-rudder"
+
+[tool.setuptools]
+packages = ["fathom_read"]

@@ -2,7 +2,7 @@
 framework's own log format, with helpers to build variations of it."""
 import textwrap
 
-from fathom_read.adapters import openmanus
+from right_rudder.adapters import openmanus
 
 OPENMANUS_CLEAN = textwrap.dedent("""\
     2025-03-31 21:37:42.119 | INFO     | app.flow.planning:_create_initial_plan:138 - Creating initial plan with ID: plan_1
@@ -30,9 +30,9 @@ OPENMANUS_CLEAN = textwrap.dedent("""\
     2025-03-31 21:37:53.000 | INFO     | app.flow.planning:_mark_step_completed:301 - Marked step 1 as completed in plan plan_1
     """)
 
-from fathom_read.adapters import chatdev
+from right_rudder.adapters import chatdev
 
-from fathom_read.adapters._code import apply_unified_diff
+from right_rudder.adapters._code import apply_unified_diff
 
 def _cd_update(ts, name, diff):
     return f"[{ts} INFO] **[Update Codes]**\n\n{name} updated.\n\n\n```\n'''\n\n'''\n{diff}\n```\n\n"
@@ -46,7 +46,7 @@ CHATDEV_CLEAN = (
     + "[2025-29-03 23:46:00 INFO] **[Post Info]**\n\ndone\n"
 )
 
-from fathom_read.adapters import magentic
+from right_rudder.adapters import magentic
 
 def _m1_sheet(verified, lookup, guess=()):
     out = ["", "Here is the updated fact sheet:", "", "1. GIVEN OR VERIFIED FACTS"]
@@ -63,7 +63,7 @@ def _m1_log(sheets, final="42"):
     body += f"---------- MagenticOneOrchestrator ----------\nFINAL ANSWER: {final}\n"
     return body
 
-from fathom_read.adapters import hyperagent
+from right_rudder.adapters import hyperagent
 
 def _ha(inst, who, text):
     return f"HyperAgent_{inst} - INFO - {who}: {text}"
@@ -80,7 +80,7 @@ HYPERAGENT_CLEAN = {"instance_id": "x__y-1", "trajectory": [
     _ha("x__y-1", "Planner's Response", "Thought: Done.\nFinal Answer: The fix is applied."),
 ]}
 
-from fathom_read.adapters import appworld
+from right_rudder.adapters import appworld
 
 def _aw_block(agent, code, output):
     return f"Response from {agent} Agent\n" + "\n".join("    " + l for l in code.splitlines()) + "\n\nCode Execution Output\n\n" + "\n".join("    " + l for l in output.splitlines()) + "\n\n"
@@ -91,7 +91,7 @@ APPWORLD_CLEAN = ("******************** Task 1/1 (abc) ********************\nLik
     + _aw_block("Supervisor", "apis.spotify.like_song(song_id=30, access_token='t')", "Code executed successfully.")
     + _aw_block("Supervisor", "apis.supervisor.complete_task()", "Code executed successfully.\n{\"trace\": \"AssertionError: ...\"}"))
 
-from fathom_read.adapters import ag2, metagpt
+from right_rudder.adapters import ag2, metagpt
 
 def _ag2(name, text):
     return {"role": "user", "name": name, "content": text.split("\n")}

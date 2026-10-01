@@ -1,6 +1,6 @@
 import json, os
-from fathom_read import load_ops
-from fathom_read.cli import EXAMPLES, main
+from right_rudder import load_ops
+from right_rudder.cli import EXAMPLES, main
 
 
 def test_examples_detect_and_normalize():
@@ -54,7 +54,7 @@ def test_cli_ops_only_sends_nothing(capsys):
 
 
 def test_openinference_span_status_and_plain_text_errors():
-    from fathom_read.adapters import openinference
+    from right_rudder.adapters import openinference
     def span(name, params, out, status=None):
         s = {"attributes": {"openinference.span.kind": "TOOL", "tool.name": name,
                             "tool.parameters": json.dumps(params), "output.value": out}}
@@ -70,7 +70,7 @@ def test_openinference_span_status_and_plain_text_errors():
 
 def test_openinference_arguments_from_input_value_when_parameters_is_a_schema():
     """Arize's CrewAI instrumentor stores the argument schema in tool.parameters and the call in input.value."""
-    from fathom_read.adapters import openinference
+    from right_rudder.adapters import openinference
     schema = json.dumps({"description": "Input for SerperDevTool.", "properties": {"search_query": {"type": "string"}},
                          "required": ["search_query"], "title": "SerperDevToolSchema", "type": "object"})
     spans = [{"attributes": {"openinference.span.kind": "TOOL", "tool.name": "Search the internet with Serper",
@@ -88,7 +88,7 @@ def test_openinference_arguments_from_input_value_when_parameters_is_a_schema():
 
 
 def test_openinference_arguments_from_parameters_when_they_carry_the_call():
-    from fathom_read.adapters import openinference
+    from right_rudder.adapters import openinference
     spans = [{"attributes": {"openinference.span.kind": "TOOL", "tool.name": "write_record",
                              "tool.parameters": json.dumps({"record": "r0", "content": "customer_id: 1"}),
                              "input.value": json.dumps({"ignored": True})}, "start_time": 0}]

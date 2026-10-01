@@ -29,10 +29,10 @@ def _install_stub():
 
 def test_listener_records_and_adapter_reads():
     bus, Fin, Err, Task = _install_stub()
-    from fathom_read.capture.crewai import FathomListener
-    from fathom_read import load_ops
+    from right_rudder.capture.crewai import RightRudderListener
+    from right_rudder import load_ops
     p = os.path.join(tempfile.mkdtemp(), "events.json")
-    L = FathomListener(p)
+    L = RightRudderListener(p)
     bus.emit(None, Fin(tool_name="write_record", tool_args={"record": "r0", "content": "customer_id: 100"}, output="ok", failure=None, agent_role="clerk"))
     bus.emit(None, Err(tool_name="write_record", tool_args={"record": "r1", "content": "customer_id: 101"}, error="timeout"))
     class Out: name = "rename"; raw = "done"; description = "Rename all"

@@ -1,8 +1,8 @@
-"""fathom-read: catch the step where an AI agent contradicts a decision it already made."""
+"""right-rudder: catch the step where an AI agent contradicts a decision it already made."""
 from .ops import Op, Finding, Verdict, RegroundVerdict  # noqa: F401
 from .client import read, expiry, reground, request_key, ReadError  # noqa: F401
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __all__ = ["Op", "Finding", "Verdict", "RegroundVerdict", "read", "expiry", "reground", "request_key", "ReadError", "read_file", "expiry_file", "load_ops"]
 
 

@@ -1,12 +1,12 @@
 """
 Record a CrewAI crew's tool calls and task completions to a JSON file the read accepts.
 
-    from fathom_read.capture.crewai import FathomListener
-    listener = FathomListener("events.json")   # keep a reference; CrewAI holds listeners weakly
+    from right_rudder.capture.crewai import RightRudderListener
+    listener = RightRudderListener("events.json")   # keep a reference; CrewAI holds listeners weakly
     crew.kickoff()
     listener.close()
 
-Then:  fathom read events.json --format crewai
+Then:  right-rudder read events.json --format crewai
 
 The listener records three events from crewai's event bus: tool_usage_finished (with the tool's
 name, arguments, and whether it reported failure), tool_usage_error, and task_completed. Nothing
@@ -21,7 +21,7 @@ try:
     from crewai.events import BaseEventListener, crewai_event_bus
     from crewai.events import ToolUsageFinishedEvent, ToolUsageErrorEvent, TaskCompletedEvent
 except ImportError as e:  # pragma: no cover
-    raise ImportError("fathom_read.capture.crewai needs crewai installed: pip install crewai") from e
+    raise ImportError("right_rudder.capture.crewai needs crewai installed: pip install crewai") from e
 
 
 def _jsonable(x: Any) -> Any:
@@ -34,7 +34,7 @@ def _jsonable(x: Any) -> Any:
     return str(x)
 
 
-class FathomListener(BaseEventListener):
+class RightRudderListener(BaseEventListener):
     """Collects the crew's committed actions as a list of events; writes them on close()."""
 
     def __init__(self, path: Optional[str] = "events.json") -> None:
@@ -80,3 +80,7 @@ class FathomListener(BaseEventListener):
             with open(self.path, "w") as f:
                 json.dump({"events": self.events}, f, indent=1)
         return self.path or ""
+
+
+# The name before the Right Rudder rebrand, kept so existing code keeps working.
+FathomListener = RightRudderListener

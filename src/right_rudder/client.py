@@ -13,7 +13,7 @@ DEFAULT_ENDPOINT = "https://read.embeddedriskanalytics.com/v1/read"
 EXPIRY_ENDPOINT = "https://read.embeddedriskanalytics.com/v1/expiry"
 REGROUND_ENDPOINT = "https://read.embeddedriskanalytics.com/v1/reground"
 KEYS_ENDPOINT = "https://read.embeddedriskanalytics.com/v1/keys"
-DEMO_KEY = "demo"  # rate-limited; a free key comes from `fathom key you@example.com` (POST /v1/keys)
+DEMO_KEY = "demo"  # rate-limited; a free key comes from `right-rudder key you@example.com` (POST /v1/keys)
 
 
 class ReadError(RuntimeError):
@@ -23,21 +23,21 @@ class ReadError(RuntimeError):
 def read(ops: Iterable[Op], supersede: Optional[List[Tuple[str, str]]] = None,
          key: Optional[str] = None, endpoint: Optional[str] = None, timeout: float = 30.0) -> Verdict:
     """Send the ops to the hosted read and return its verdict."""
-    key = key or os.environ.get("FATHOM_API_KEY") or DEMO_KEY
-    endpoint = endpoint or os.environ.get("FATHOM_ENDPOINT") or DEFAULT_ENDPOINT
+    key = key or (os.environ.get("RIGHT_RUDDER_API_KEY") or os.environ.get("FATHOM_API_KEY")) or DEMO_KEY
+    endpoint = endpoint or (os.environ.get("RIGHT_RUDDER_ENDPOINT") or os.environ.get("FATHOM_ENDPOINT")) or DEFAULT_ENDPOINT
     body = json.dumps({"ops": [o.as_dict() for o in ops], "supersede": [list(p) for p in (supersede or [])]}).encode()
     req = urllib.request.Request(endpoint, data=body, method="POST", headers={
         "Content-Type": "application/json", "Authorization": f"Bearer {key}",
-        "User-Agent": "fathom-read/" + __import__("fathom_read").__version__})
+        "User-Agent": "right-rudder/" + __import__("right_rudder").__version__})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return Verdict.from_dict(json.loads(r.read().decode()))
     except urllib.error.HTTPError as e:
         msg = e.read().decode(errors="replace")
         if e.code == 401:
-            raise ReadError("the read rejected the key; set FATHOM_API_KEY or get a free one with `fathom key you@example.com`") from None
+            raise ReadError("the read rejected the key; set RIGHT_RUDDER_API_KEY or get a free one with `right-rudder key you@example.com`") from None
         if e.code == 429:
-            raise ReadError("the daily limit for this key is reached; a free key with a higher limit comes from `fathom key you@example.com`") from None
+            raise ReadError("the daily limit for this key is reached; a free key with a higher limit comes from `right-rudder key you@example.com`") from None
         raise ReadError(f"the read returned {e.code}: {msg[:200]}") from None
     except urllib.error.URLError as e:
         raise ReadError(f"could not reach the read at {endpoint}: {e.reason}") from None
@@ -52,23 +52,23 @@ def expiry(ops: Iterable[Op], supersede: Optional[List[Tuple[str, str]]] = None,
     life remaining in steps, and two alarms, one that fires while a rejected action stands in the record and one that fires on
     committed load alone. Name a calibration for your workload (the service lists them at GET /v1/calibrations); with none named
     the read scores under a pooled default and labels the result a shape rather than a number."""
-    key = key or os.environ.get("FATHOM_API_KEY") or DEMO_KEY
-    endpoint = endpoint or os.environ.get("FATHOM_EXPIRY_ENDPOINT") or EXPIRY_ENDPOINT
+    key = key or (os.environ.get("RIGHT_RUDDER_API_KEY") or os.environ.get("FATHOM_API_KEY")) or DEMO_KEY
+    endpoint = endpoint or (os.environ.get("RIGHT_RUDDER_EXPIRY_ENDPOINT") or os.environ.get("FATHOM_EXPIRY_ENDPOINT")) or EXPIRY_ENDPOINT
     payload = {"ops": [o.as_dict() for o in ops], "supersede": [list(p) for p in (supersede or [])]}
     if calibration: payload["calibration"] = calibration
     if horizon: payload["horizon_k"] = int(horizon)
     if alarm_multiple: payload["alarm_mult"] = float(alarm_multiple)
     req = urllib.request.Request(endpoint, data=json.dumps(payload).encode(), method="POST", headers={
-        "Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "fathom-read/" + __import__("fathom_read").__version__})
+        "Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "right-rudder/" + __import__("right_rudder").__version__})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return json.loads(r.read().decode())
     except urllib.error.HTTPError as e:
         msg = e.read().decode(errors="replace")
         if e.code == 401:
-            raise ReadError("the read rejected the key; set FATHOM_API_KEY or get a free one with `fathom key you@example.com`") from None
+            raise ReadError("the read rejected the key; set RIGHT_RUDDER_API_KEY or get a free one with `right-rudder key you@example.com`") from None
         if e.code == 429:
-            raise ReadError("the daily limit for this key is reached; a free key with a higher limit comes from `fathom key you@example.com`") from None
+            raise ReadError("the daily limit for this key is reached; a free key with a higher limit comes from `right-rudder key you@example.com`") from None
         raise ReadError(f"the read returned {e.code}: {msg[:200]}") from None
     except urllib.error.URLError as e:
         raise ReadError(f"could not reach the read at {endpoint}: {e.reason}") from None
@@ -83,19 +83,19 @@ def reground(ops: Iterable[Op], proposals: Iterable[dict], supersede: Optional[L
     report it wants to cite from). The service evaluates each one against the committed state the ops build and returns
     proceed, filter (take the first of `keep`), or reground (put `facts` back in front of the agent, see
     RegroundVerdict.prompt_note, and ask again). Needs a key; the demo key covers the reads only."""
-    key = key or os.environ.get("FATHOM_API_KEY") or DEMO_KEY
-    endpoint = endpoint or os.environ.get("FATHOM_REGROUND_ENDPOINT") or REGROUND_ENDPOINT
+    key = key or (os.environ.get("RIGHT_RUDDER_API_KEY") or os.environ.get("FATHOM_API_KEY")) or DEMO_KEY
+    endpoint = endpoint or (os.environ.get("RIGHT_RUDDER_REGROUND_ENDPOINT") or os.environ.get("FATHOM_REGROUND_ENDPOINT")) or REGROUND_ENDPOINT
     payload = {"ops": [o.as_dict() for o in ops], "supersede": [list(p) for p in (supersede or [])],
                "proposals": [dict(p) for p in proposals]}
     req = urllib.request.Request(endpoint, data=json.dumps(payload).encode(), method="POST", headers={
-        "Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "fathom-read/" + __import__("fathom_read").__version__})
+        "Content-Type": "application/json", "Authorization": f"Bearer {key}", "User-Agent": "right-rudder/" + __import__("right_rudder").__version__})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return RegroundVerdict.from_dict(json.loads(r.read().decode()))
     except urllib.error.HTTPError as e:
         msg = e.read().decode(errors="replace")
         if e.code == 401:
-            raise ReadError("the repair needs a key; get a free one with `fathom key you@example.com` and set FATHOM_API_KEY") from None
+            raise ReadError("the repair needs a key; get a free one with `right-rudder key you@example.com` and set RIGHT_RUDDER_API_KEY") from None
         if e.code == 429:
             raise ReadError("the daily limit for this key is reached; it resets at midnight UTC") from None
         raise ReadError(f"the repair returned {e.code}: {msg[:200]}") from None
@@ -105,9 +105,9 @@ def reground(ops: Iterable[Op], proposals: Iterable[dict], supersede: Optional[L
 
 def request_key(email: str, endpoint: Optional[str] = None, timeout: float = 30.0) -> dict:
     """Ask the service for a free key. Returns {"key", "tier", "daily_limit", "note"}; the key is shown once."""
-    endpoint = endpoint or os.environ.get("FATHOM_KEYS_ENDPOINT") or KEYS_ENDPOINT
+    endpoint = endpoint or (os.environ.get("RIGHT_RUDDER_KEYS_ENDPOINT") or os.environ.get("FATHOM_KEYS_ENDPOINT")) or KEYS_ENDPOINT
     req = urllib.request.Request(endpoint, data=json.dumps({"email": email}).encode(), method="POST",
-                                 headers={"Content-Type": "application/json", "User-Agent": "fathom-read/" + __import__("fathom_read").__version__})
+                                 headers={"Content-Type": "application/json", "User-Agent": "right-rudder/" + __import__("right_rudder").__version__})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return json.loads(r.read().decode())
