@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.0 (unreleased)
+## 0.7.0 (2026-10-02)
 
 Fathom is now Right Rudder, by Embedded Risk Analytics. The package installs as `right-rudder`, imports as `right_rudder`, and runs as the `right-rudder` command. The reads stay as they were. The same hosted service at read.embeddedriskanalytics.com forms every verdict, and existing free keys keep working.
 
