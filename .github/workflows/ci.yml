@@ -16,6 +16,6 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: pip install -e ".[dev]"
       - run: pytest -q
-      - run: fathom formats
-      - run: fathom read src/fathom_read/examples/knowledge_update.json --ops
+      - run: right-rudder formats
+      - run: right-rudder read src/right_rudder/examples/knowledge_update.json --ops
       - run: bash scripts_boundary_check.sh
